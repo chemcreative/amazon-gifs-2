@@ -237,4 +237,4 @@ MIT License - feel free to use and modify as needed!
 - Implement caching
 - Add GIF metadata display
 - Create admin panel for folder management
-- Add authentication for private folders 
+- Add authentication for private folders # Amazon Party GIF Display - Clone Test
