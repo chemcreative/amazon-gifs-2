@@ -44,7 +44,7 @@ function getPublicUrl(fileId) {
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
 }
 
-// Route to get all GIF files from the specified folder
+// Get GIFs endpoint
 app.get('/gifs', async (req, res) => {
   try {
     if (!drive) {
@@ -80,20 +80,23 @@ app.get('/gifs', async (req, res) => {
       // Check if MP4 version exists
       const mp4FileId = await gifConverter.checkMp4Exists(file.name, mp4FolderId);
       
-      const gifData = {
-        id: file.id,
-        name: file.name,
-        url: getPublicUrl(file.id),
-        webViewLink: file.webViewLink,
-        mp4Available: !!mp4FileId,
-        mp4Url: mp4FileId ? gifConverter.getMp4PublicUrl(mp4FileId) : null,
-        mp4Id: mp4FileId
-      };
-      
-      gifs.push(gifData);
+      // ONLY INCLUDE GIFS THAT HAVE MP4S READY
+      if (mp4FileId) {
+        const gifData = {
+          id: file.id,
+          name: file.name,
+          url: getPublicUrl(file.id),
+          webViewLink: file.webViewLink,
+          mp4Available: true,
+          mp4Url: gifConverter.getMp4PublicUrl(mp4FileId),
+          mp4Id: mp4FileId
+        };
+        
+        gifs.push(gifData);
+      }
     }
 
-    console.log(`Found ${gifs.length} GIF files in folder ${folderId}`);
+    console.log(`Found ${gifs.length} GIFs with MP4s ready (${files.length} total GIFs in folder)`);
     res.json({ gifs });
 
   } catch (error) {
@@ -236,6 +239,63 @@ app.post('/convert-all', async (req, res) => {
   }
 });
 
+// Get processing status endpoint
+app.get('/status', async (req, res) => {
+  try {
+    if (!drive) {
+      return res.status(500).json({ 
+        error: 'Google Drive API not initialized'
+      });
+    }
+
+    const folderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+    const mp4FolderId = process.env.GOOGLE_DRIVE_MP4_FOLDER_ID;
+    
+    if (!folderId || !mp4FolderId) {
+      return res.status(400).json({ 
+        error: 'Folder IDs not configured'
+      });
+    }
+
+    // Get all GIF files
+    const response = await drive.files.list({
+      q: `'${folderId}' in parents and mimeType contains 'image/gif' and trashed=false`,
+      fields: 'files(id, name)',
+      orderBy: 'createdTime desc'
+    });
+
+    const files = response.data.files || [];
+    let readyCount = 0;
+    let processingCount = 0;
+    
+    // Check each GIF for MP4 version
+    for (const file of files) {
+      const mp4FileId = await gifConverter.checkMp4Exists(file.name, mp4FolderId);
+      
+      if (mp4FileId) {
+        readyCount++;
+      } else {
+        processingCount++;
+      }
+    }
+
+    res.json({
+      totalGifs: files.length,
+      readyForDisplay: readyCount,
+      processing: processingCount,
+      message: processingCount > 0 
+        ? `${processingCount} GIF(s) are being converted and will appear soon`
+        : 'All GIFs are ready for instant download!'
+    });
+
+  } catch (error) {
+    console.error('Error getting status:', error);
+    res.status(500).json({ 
+      error: 'Failed to get processing status'
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -297,11 +357,11 @@ app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`);
   await initializeGoogleDrive();
   
-  // Start auto-conversion checker (every 5 minutes)
-  setInterval(checkForNewGifsToConvert, 5 * 60 * 1000);
+  // Start auto-conversion checker (every 1 minute for faster processing)
+  setInterval(checkForNewGifsToConvert, 1 * 60 * 1000);
   
-  // Run initial check after 30 seconds
-  setTimeout(checkForNewGifsToConvert, 30000);
+  // Run initial check after 10 seconds
+  setTimeout(checkForNewGifsToConvert, 10000);
 });
 
 // Graceful shutdown

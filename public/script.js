@@ -188,26 +188,16 @@ function createGifElement(gif) {
     const downloadOverlay = document.createElement('div');
     downloadOverlay.className = 'download-overlay';
     
-    // MP4 Download button
+    // Instant MP4 Download button (all GIFs now have MP4s ready)
     const mp4Button = document.createElement('button');
     mp4Button.className = 'download-btn mp4-btn';
-    mp4Button.innerHTML = '📱 Instagram';
+    mp4Button.innerHTML = '📱 Download';
     mp4Button.title = 'Download MP4 for Instagram';
     
-    if (gif.mp4Available && gif.mp4Url) {
-        mp4Button.onclick = (e) => {
-            e.stopPropagation();
-            downloadMp4(gif.mp4Url, gif.name.replace('.gif', '.mp4'));
-        };
-    } else {
-        mp4Button.onclick = (e) => {
-            e.stopPropagation();
-            convertAndDownload(gif.id, gif.name);
-        };
-        mp4Button.classList.add('convert-needed');
-        mp4Button.innerHTML = '⚡ Convert';
-        mp4Button.title = 'Convert to MP4 for Instagram';
-    }
+    mp4Button.onclick = (e) => {
+        e.stopPropagation();
+        downloadMp4(gif.mp4Url, gif.name.replace('.gif', '.mp4'));
+    };
     
     downloadOverlay.appendChild(mp4Button);
     
@@ -245,110 +235,6 @@ function downloadMp4(mp4Url, fileName) {
     
     // Show success message
     showNotification(`📱 Downloaded ${fileName} for Instagram!`, 'success');
-}
-
-// Convert GIF to MP4 and download
-async function convertAndDownload(gifId, gifName) {
-    const button = document.querySelector(`[data-gif-id="${gifId}"] .mp4-btn`);
-    
-    try {
-        // Update button state
-        button.innerHTML = '⏳ Converting...';
-        button.disabled = true;
-        
-        const apiUrl = window.location.hostname === 'localhost' 
-            ? `http://localhost:3000/convert/${gifId}` 
-            : `/convert/${gifId}`;
-        
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // Show conversion started message
-            showNotification(`🔄 Converting ${gifName} to MP4...`, 'info');
-            
-            // Poll for completion
-            pollForMp4Completion(gifId, gifName, button);
-        } else {
-            throw new Error(data.error || 'Conversion failed');
-        }
-        
-    } catch (error) {
-        console.error('Conversion error:', error);
-        showNotification(`❌ Failed to convert ${gifName}`, 'error');
-        
-        // Reset button
-        button.innerHTML = '⚡ Convert';
-        button.disabled = false;
-    }
-}
-
-// Poll for MP4 completion
-async function pollForMp4Completion(gifId, gifName, button) {
-    const maxAttempts = 30; // 5 minutes max
-    let attempts = 0;
-    
-    const checkCompletion = async () => {
-        attempts++;
-        
-        try {
-            // Reload GIF data to check for MP4
-            const apiUrl = window.location.hostname === 'localhost' 
-                ? 'http://localhost:3000/gifs' 
-                : '/gifs';
-            
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-            
-            const updatedGif = data.gifs.find(gif => gif.id === gifId);
-            
-            if (updatedGif && updatedGif.mp4Available && updatedGif.mp4Url) {
-                // Conversion completed!
-                showNotification(`✅ ${gifName} converted successfully!`, 'success');
-                
-                // Update button to download
-                button.innerHTML = '📱 Instagram';
-                button.disabled = false;
-                button.onclick = (e) => {
-                    e.stopPropagation();
-                    downloadMp4(updatedGif.mp4Url, gifName.replace('.gif', '.mp4'));
-                };
-                button.classList.remove('convert-needed');
-                button.title = 'Download MP4 for Instagram';
-                
-                // Auto-download
-                downloadMp4(updatedGif.mp4Url, gifName.replace('.gif', '.mp4'));
-                
-            } else if (attempts < maxAttempts) {
-                // Continue polling
-                setTimeout(checkCompletion, 10000); // Check every 10 seconds
-                button.innerHTML = `⏳ Converting... (${Math.round(attempts * 10 / 60)}m)`;
-            } else {
-                // Timeout
-                showNotification(`⏰ Conversion timeout for ${gifName}`, 'error');
-                button.innerHTML = '⚡ Retry';
-                button.disabled = false;
-            }
-            
-        } catch (error) {
-            console.error('Polling error:', error);
-            if (attempts < maxAttempts) {
-                setTimeout(checkCompletion, 10000);
-            } else {
-                button.innerHTML = '⚡ Retry';
-                button.disabled = false;
-            }
-        }
-    };
-    
-    // Start polling
-    setTimeout(checkCompletion, 10000); // First check after 10 seconds
 }
 
 // Show notification

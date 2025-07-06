@@ -19,12 +19,13 @@ A live-updating website that displays GIF files from a Google Drive folder. The 
 - 🚫 Graceful error handling with smart URL fallbacks
 - 📶 Offline/online detection
 
-### 🎯 Instagram Integration (NEW)
-- ⚡ **Auto-Convert**: Automatically converts GIFs to MP4 format in background
-- 📥 **One-Click Download**: Download Instagram-ready MP4 files with hover buttons
+### 🎯 Instagram Integration (OPTIMIZED!)
+- ⚡ **Auto-Convert on Upload**: Automatically converts new GIFs to MP4 format within 1 minute
+- 📥 **Instant Download**: All displayed GIFs have MP4s ready for immediate download
 - 🎬 **Optimized Output**: MP4s optimized for Instagram (30fps, yuv420p, even dimensions)
-- 🔄 **Smart Processing**: Checks for existing MP4s to avoid duplicate conversions
-- 📱 **Real-time Status**: Live conversion progress with visual feedback
+- 🔄 **Smart Processing**: Only shows GIFs once MP4 conversion is complete
+- 📱 **Zero Wait Time**: Click download and get your file instantly
+- 🚀 **Background Processing**: New GIFs are converted automatically in the background
 
 ## 🚀 Quick Start
 
@@ -137,12 +138,15 @@ To get your folder ID:
 
 ### Core Endpoints
 - `GET /` - Serve the frontend
-- `GET /gifs` - Get list of GIF files with MP4 availability status
+- `GET /gifs` - Get list of GIFs that have MP4s ready for instant download
+- `GET /status` - Get processing status (how many GIFs are ready vs processing)
 - `GET /health` - Health check endpoint
 
-### Conversion Endpoints (NEW)
-- `POST /convert/:gifId` - Convert specific GIF to MP4 format
-- `POST /convert-all` - Bulk convert all GIFs to MP4 format
+### Legacy Conversion Endpoints
+- `POST /convert/:gifId` - Convert specific GIF to MP4 format (rarely needed)
+- `POST /convert-all` - Bulk convert all GIFs to MP4 format (rarely needed)
+
+**Note**: With auto-conversion enabled, manual conversion endpoints are rarely needed as all new GIFs are processed automatically within 1 minute.
 
 ## 🎨 Customization
 
@@ -237,4 +241,4 @@ MIT License - feel free to use and modify as needed!
 - Implement caching
 - Add GIF metadata display
 - Create admin panel for folder management
-- Add authentication for private folders # Amazon Party GIF Display - Clone Test
+- Add authentication for private folders 
