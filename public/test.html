@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Test</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .gif-test {
+            max-width: 500px;
+            margin: 20px auto;
+            border: 1px solid #333;
+            padding: 10px;
+        }
+        .gif-test img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>GIF Animation Test</h1>
+    
+    <div class="gif-test">
+        <h3>OLD GIF - Direct URL Test</h3>
+        <img src="https://lh3.googleusercontent.com/d/1gst0isgziyJY8X5Swm6RmN4lk2XNzNgt" alt="Test GIF">
+        <p>123.gif: https://lh3.googleusercontent.com/d/1gst0isgziyJY8X5Swm6RmN4lk2XNzNgt</p>
+    </div>
+    
+    <div class="gif-test">
+        <h3>NEW GIF - Direct URL Test</h3>
+        <img src="https://lh3.googleusercontent.com/d/1VDqiKePPnDAG5MpeaEiPqo7s6G3QDJvX" alt="New GIF">
+        <p>unnamed.gif: https://lh3.googleusercontent.com/d/1VDqiKePPnDAG5MpeaEiPqo7s6G3QDJvX</p>
+    </div>
+    
+    <div class="gif-test">
+        <h3>NEW GIF - Alternative URL Test</h3>
+        <img src="https://drive.google.com/uc?export=view&id=1VDqiKePPnDAG5MpeaEiPqo7s6G3QDJvX" alt="New GIF Alt">
+        <p>unnamed.gif: https://drive.google.com/uc?export=view&id=1VDqiKePPnDAG5MpeaEiPqo7s6G3QDJvX</p>
+    </div>
+    
+    <div class="gif-test">
+        <h3>NEW GIF - Download URL Test</h3>
+        <img src="https://drive.google.com/uc?export=download&id=1VDqiKePPnDAG5MpeaEiPqo7s6G3QDJvX" alt="New GIF Download">
+        <p>unnamed.gif: https://drive.google.com/uc?export=download&id=1VDqiKePPnDAG5MpeaEiPqo7s6G3QDJvX</p>
+    </div>
+    
+    <script>
+        // Test different URL formats
+        console.log('Testing GIF URLs...');
+        
+        // Add load event listeners to track which URLs work
+        document.querySelectorAll('img').forEach((img, index) => {
+            img.onload = () => {
+                console.log(`Image ${index + 1} loaded successfully`);
+            };
+            img.onerror = () => {
+                console.log(`Image ${index + 1} failed to load`);
+            };
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,34 @@
+{
+  "name": "Amazon Party GIF Display",
+  "description": "A live-updating website that displays GIFs from Google Drive",
+  "repository": "https://github.com/your-username/amazon-party-gif",
+  "keywords": ["node", "express", "google-drive", "gif"],
+  "env": {
+    "GOOGLE_SERVICE_ACCOUNT_KEY": {
+      "description": "JSON string of Google Service Account credentials",
+      "required": true
+    },
+    "GOOGLE_DRIVE_FOLDER_ID": {
+      "description": "ID of the Google Drive folder containing GIFs",
+      "required": true
+    },
+    "GOOGLE_DRIVE_MP4_FOLDER_ID": {
+      "description": "ID of the Google Drive folder for converted MP4 files",
+      "required": true
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+} 
